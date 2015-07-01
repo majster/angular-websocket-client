@@ -69,6 +69,7 @@
 
             function onOpen(event) {
                 $log.debug('wsClient connected to [' + options.url + ']');
+                $log.debug(event);
                 if (reconnectTimeout) {
                     $timeout.cancel(reconnectTimeout);
                 }
