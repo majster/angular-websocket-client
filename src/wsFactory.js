@@ -6,14 +6,19 @@
 
     function wsFactory($timeout, $log) {
 
-        wsFactory.initWsClient = function(options){
+        var NO_CONNECTION = 0;
+        var CONNECTED = 1;
+        var CLOSING = 2;
+        var CLOSED_OR_COULDNT_OPEN = 3;
+
+        wsFactory.initWsClient = function (options) {
             var wsClient = {};
+            var reconnectTimeout = null;
+            var subscribers = [];
 
             // this gets populated by WebSocket obj
             wsClient.socket = null;
             wsClient.options = {};
-
-            var reconnectTimeout = null;
 
             // default options
             wsClient.defaults = {
@@ -45,6 +50,12 @@
 
             wsClient.subscribe = function (subscriber, callback) {
                 $log.debug('new subscriber [' + subscriber + '] to socket [' + wsClient.options.url + ']');
+                subscribers[subscriber] = callback;
+            };
+
+            wsClient.unsubscribe = function (subscriber) {
+                $log.debug('unsubscribing [' + subscriber + '] from socket [' + wsClient.options.url + ']');
+                delete subscribers[subscriber];
             };
 
             function connect() {
@@ -75,6 +86,13 @@
 
             function onMessage(event) {
                 $log.debug('wsClient connection to [' + wsClient.options.url + '] message received, will notify listeners');
+                $log.debug(event);
+                if (event && event.data) {
+                    // notify subscribers
+                    angular.forEach(subscribers, function (callback) {
+                        callback(JSON.parse(event.data));
+                    });
+                }
             }
 
             function onError(event) {
