@@ -19,7 +19,7 @@
             callbacks: {}
         };
 
-        var wsClient = function (_options) {
+        return function (_options) {
             // https://docs.angularjs.org/api/ng/function/angular.extend
             this.options = angular.extend({}, defaults, _options);
             this.subscribers = [];
@@ -27,36 +27,37 @@
 
             // this gets populated by WebSocket obj
             this.socket = null;
-        };
 
-        wsClient.connect = function () {
-            if (!this.options.url) {
-                $log.error('wsClient connection URL not defined!');
-                return;
-            }
+            this.connect = function () {
+                if (!this.options.url) {
+                    $log.error('wsClient connection URL not defined!');
+                    return;
+                }
 
-            connect();
-        };
+                connect();
+            };
 
-        wsClient.send = function (message) {
-            this.socket.send(message);
-        };
+            this.send = function (message) {
+                this.socket.send(message);
+            };
 
-        // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
-        wsClient.close = function (code, reason) {
-            // we don't want to reconnect when manual close
-            this.options.reconnect = false;
-            this.socket.close(code, reason);
-        };
+            // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
+            this.close = function (code, reason) {
+                // we don't want to reconnect when manual close
+                this.options.reconnect = false;
+                this.socket.close(code, reason);
+            };
 
-        wsClient.subscribe = function (subscriber, callback) {
-            $log.debug('new subscriber [' + subscriber + '] to socket [' + this.options.url + ']');
-            this.subscribers[subscriber] = callback;
-        };
+            this.subscribe = function (subscriber, callback) {
+                $log.debug('new subscriber [' + subscriber + '] to socket [' + this.options.url + ']');
+                this.subscribers[subscriber] = callback;
+            };
 
-        wsClient.unsubscribe = function (subscriber) {
-            $log.debug('unsubscribing [' + subscriber + '] from socket [' + this.options.url + ']');
-            delete this.subscribers[subscriber];
+            this.unsubscribe = function (subscriber) {
+                $log.debug('unsubscribing [' + subscriber + '] from socket [' + this.options.url + ']');
+                delete this.subscribers[subscriber];
+            };
+
         };
 
         function connect() {
@@ -100,8 +101,6 @@
             $log.debug('wsClient connection to [' + this.options.url + '] error');
             $log.error(event);
         }
-
-        return wsClient;
     }
 
     angular.module('am.ws').factory('wsClient', wsClient);
