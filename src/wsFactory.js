@@ -58,49 +58,48 @@
                 delete this.subscribers[subscriber];
             };
 
+            function connect() {
+                this.socket = new WebSocket(this.options.url);
+                this.socket.onopen = onOpen;
+                this.socket.onclose = onClose;
+                this.socket.onmessage = onMessage;
+                this.socket.onerror = onError;
+            }
+
+            function onOpen(event) {
+                $log.debug('wsClient connected to [' + this.options.url + ']');
+                if (this.reconnectTimeout) {
+                    $timeout.cancel(this.reconnectTimeout);
+                }
+            }
+
+            function onClose(event) {
+                $log.debug('wsClient connection to [' + this.options.url + '] closed');
+                if (this.reconnectTimeout) {
+                    $timeout.cancel(this.reconnectTimeout);
+                }
+                if (this.options.reconnect) {
+                    $log.debug('wsClient will try to reconnect in [' + this.options.reconnectIntervalTimeout + '] ms');
+                    this.reconnectTimeout = $timeout(connect, this.options.reconnectIntervalTimeout);
+                }
+            }
+
+            function onMessage(event) {
+                $log.debug('wsClient connection to [' + this.options.url + '] message received, will notify listeners');
+                $log.debug(event);
+                if (event && event.data) {
+                    // notify subscribers
+                    angular.forEach(subscribers, function (callback) {
+                        callback(JSON.parse(event.data));
+                    });
+                }
+            }
+
+            function onError(event) {
+                $log.debug('wsClient connection to [' + this.options.url + '] error');
+                $log.error(event);
+            }
         };
-
-        function connect() {
-            this.socket = new WebSocket(this.options.url);
-            this.socket.onopen = onOpen;
-            this.socket.onclose = onClose;
-            this.socket.onmessage = onMessage;
-            this.socket.onerror = onError;
-        }
-
-        function onOpen(event) {
-            $log.debug('wsClient connected to [' + this.options.url + ']');
-            if (this.reconnectTimeout) {
-                $timeout.cancel(this.reconnectTimeout);
-            }
-        }
-
-        function onClose(event) {
-            $log.debug('wsClient connection to [' + this.options.url + '] closed');
-            if (this.reconnectTimeout) {
-                $timeout.cancel(this.reconnectTimeout);
-            }
-            if (this.options.reconnect) {
-                $log.debug('wsClient will try to reconnect in [' + this.options.reconnectIntervalTimeout + '] ms');
-                this.reconnectTimeout = $timeout(connect, this.options.reconnectIntervalTimeout);
-            }
-        }
-
-        function onMessage(event) {
-            $log.debug('wsClient connection to [' + this.options.url + '] message received, will notify listeners');
-            $log.debug(event);
-            if (event && event.data) {
-                // notify subscribers
-                angular.forEach(subscribers, function (callback) {
-                    callback(JSON.parse(event.data));
-                });
-            }
-        }
-
-        function onError(event) {
-            $log.debug('wsClient connection to [' + this.options.url + '] error');
-            $log.error(event);
-        }
     }
 
     angular.module('am.ws').factory('wsClient', wsClient);
