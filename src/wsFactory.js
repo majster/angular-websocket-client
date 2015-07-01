@@ -34,7 +34,11 @@
                     return;
                 }
 
-                connect();
+                this.socket = new WebSocket(this.options.url);
+                this.socket.onopen = onOpen;
+                this.socket.onclose = onClose;
+                this.socket.onmessage = onMessage;
+                this.socket.onerror = onError;
             };
 
             this.send = function (message) {
@@ -58,14 +62,6 @@
                 delete this.subscribers[subscriber];
             };
 
-            function connect() {
-                this.socket = new WebSocket(this.options.url);
-                this.socket.onopen = onOpen;
-                this.socket.onclose = onClose;
-                this.socket.onmessage = onMessage;
-                this.socket.onerror = onError;
-            }
-
             function onOpen(event) {
                 $log.debug('wsClient connected to [' + this.options.url + ']');
                 if (this.reconnectTimeout) {
@@ -80,7 +76,7 @@
                 }
                 if (this.options.reconnect) {
                     $log.debug('wsClient will try to reconnect in [' + this.options.reconnectIntervalTimeout + '] ms');
-                    this.reconnectTimeout = $timeout(connect, this.options.reconnectIntervalTimeout);
+                    this.reconnectTimeout = $timeout(this.connect, this.options.reconnectIntervalTimeout);
                 }
             }
 
