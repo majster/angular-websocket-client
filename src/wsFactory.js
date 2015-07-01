@@ -77,6 +77,7 @@
 
             function onClose(event) {
                 $log.debug('wsClient connection to [' + options.url + '] closed');
+                $log.debug(event);
                 if (reconnectTimeout) {
                     $timeout.cancel(reconnectTimeout);
                 }
