@@ -25,7 +25,7 @@
             // this gets populated by WebSocket obj
             var socket = null;
 
-            var subscribers = [];
+            var subscribers = {};
             var reconnectTimeout = null;
 
 
@@ -90,15 +90,11 @@
             function onMessage(event) {
                 $log.debug('wsClient connection to [' + options.url + '] message received, will notify listeners');
                 $log.debug(event);
-                try {
-                    if (event && event.data) {
-                        // notify subscribes about message
-                        angular.forEach(subscribers, function (callback) {
-                            callback(JSON.parse(event.data));
-                        });
-                    }
-                } catch (e) {
-                    console.error(e);
+                if (event && event.data) {
+                    // notify subscribes about message
+                    angular.forEach(subscribers, function (callback) {
+                        callback(JSON.parse(event.data));
+                    });
                 }
             }
 
