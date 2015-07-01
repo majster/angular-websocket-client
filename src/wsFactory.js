@@ -88,7 +88,7 @@
             }
 
             function onMessage(event) {
-                $log.debug('wsClient connection to [' + options.url + '] message received, will notify listeners');
+                $log.debug('wsClient connection to [' + options.url + '] message received, will notify [' + subscribers.length + '] subscribers');
                 $log.debug(event);
                 if (event && event.data) {
                     // notify subscribes about message
