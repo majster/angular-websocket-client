@@ -90,11 +90,15 @@
             function onMessage(event) {
                 $log.debug('wsClient connection to [' + options.url + '] message received, will notify listeners');
                 $log.debug(event);
-                if (event && event.data) {
-                    // notify subscribers
-                    angular.forEach(subscribers, function (callback) {
-                        callback(JSON.parse(event.data));
-                    });
+                try {
+                    if (event && event.data) {
+                        // notify subscribes about message
+                        angular.forEach(subscribers, function (callback) {
+                            callback(JSON.parse(event.data));
+                        });
+                    }
+                } catch (e) {
+                    console.error(e);
                 }
             }
 
