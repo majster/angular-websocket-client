@@ -19,7 +19,7 @@
             callbacks: {}
         };
 
-        return function (_options) {
+        var wsClient = function (_options) {
             // https://docs.angularjs.org/api/ng/function/angular.extend
             this.options = angular.extend({}, defaults, _options);
             this.subscribers = [];
@@ -34,11 +34,7 @@
                     return;
                 }
 
-                this.socket = new WebSocket(this.options.url);
-                this.socket.onopen = onOpen;
-                this.socket.onclose = onClose;
-                this.socket.onmessage = onMessage;
-                this.socket.onerror = onError;
+                connect();
             };
 
             this.send = function (message) {
@@ -61,41 +57,51 @@
                 $log.debug('unsubscribing [' + subscriber + '] from socket [' + this.options.url + ']');
                 delete this.subscribers[subscriber];
             };
-
-            function onOpen(event) {
-                $log.debug('wsClient connected to [' + this.options.url + ']');
-                if (this.reconnectTimeout) {
-                    $timeout.cancel(this.reconnectTimeout);
-                }
-            }
-
-            function onClose(event) {
-                $log.debug('wsClient connection to [' + this.options.url + '] closed');
-                if (this.reconnectTimeout) {
-                    $timeout.cancel(this.reconnectTimeout);
-                }
-                if (this.options.reconnect) {
-                    $log.debug('wsClient will try to reconnect in [' + this.options.reconnectIntervalTimeout + '] ms');
-                    this.reconnectTimeout = $timeout(this.connect, this.options.reconnectIntervalTimeout);
-                }
-            }
-
-            function onMessage(event) {
-                $log.debug('wsClient connection to [' + this.options.url + '] message received, will notify listeners');
-                $log.debug(event);
-                if (event && event.data) {
-                    // notify subscribers
-                    angular.forEach(subscribers, function (callback) {
-                        callback(JSON.parse(event.data));
-                    });
-                }
-            }
-
-            function onError(event) {
-                $log.debug('wsClient connection to [' + this.options.url + '] error');
-                $log.error(event);
-            }
         };
+
+        function connect() {
+            wsClient.socket = new WebSocket(wsClient.options.url);
+            wsClient.socket.onopen = onOpen;
+            wsClient.socket.onclose = onClose;
+            wsClient.socket.onmessage = onMessage;
+            wsClient.socket.onerror = onError;
+        }
+
+        function onOpen(event) {
+            $log.debug('wsClient connected to [' + wsClient.options.url + ']');
+            if (wsClient.reconnectTimeout) {
+                $timeout.cancel(wsClient.reconnectTimeout);
+            }
+        }
+
+        function onClose(event) {
+            $log.debug('wsClient connection to [' + wsClient.options.url + '] closed');
+            if (wsClient.reconnectTimeout) {
+                $timeout.cancel(wsClient.reconnectTimeout);
+            }
+            if (wsClient.options.reconnect) {
+                $log.debug('wsClient will try to reconnect in [' + wsClient.options.reconnectIntervalTimeout + '] ms');
+                wsClient.reconnectTimeout = $timeout(connect, wsClient.options.reconnectIntervalTimeout);
+            }
+        }
+
+        function onMessage(event) {
+            $log.debug('wsClient connection to [' + wsClient.options.url + '] message received, will notify listeners');
+            $log.debug(event);
+            if (event && event.data) {
+                // notify subscribers
+                angular.forEach(wsClient.subscribers, function (callback) {
+                    callback(JSON.parse(event.data));
+                });
+            }
+        }
+
+        function onError(event) {
+            $log.debug('wsClient connection to [' + wsClient.options.url + '] error');
+            $log.error(event);
+        }
+        
+        return wsClient;
     }
 
     angular.module('am.ws').factory('wsClient', wsClient);
