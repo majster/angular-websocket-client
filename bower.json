@@ -1,0 +1,7 @@
+{
+  "name": "am-websocket",
+  "main": ["src/wsFactory.js"],
+  "version": "0.1",
+  "description": "Web socket client factory.",
+  "license": "MIT"
+}
