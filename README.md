@@ -16,11 +16,11 @@ angular.module('myApp', ['am-ws', ...]);
 - create ws client
     
 ```javascript
-angular.module('myApp').service('myWsClient', function(wsFactory){
+angular.module('myApp').service('myWsClient', function(wsClient){
     var options = {
         url: 'ws://localohost:5678'
     };
-    this.socket = wsFactory.initWsClient(options);
+    this = new wsClient(options);
 });
 ```    
 
@@ -28,12 +28,13 @@ angular.module('myApp').service('myWsClient', function(wsFactory){
 
 ```javascript
 angular.module('myApp').controller('myCtrl', function(myWsClient, $log){
-    myWsClient.socket.subscribe('mySubscription', function(message){
-        $log.debug(message);
-    });
-    myWsClient.socket.send(JSON.stringify({text: 'hello'}));
-    myWsClient.socket.unsubscribe('mySubscription');
-    myWsClient.socket.close();
+    myWsClient.subscribe('mySubscription', function(message){
+            $log.debug(message);
+        });
+    myWsClient.connect();
+    myWsClient.send(JSON.stringify({text: 'hello'}));
+    myWsClient.unsubscribe('mySubscription');
+    myWsClient.close();
 });
 ```   
   
