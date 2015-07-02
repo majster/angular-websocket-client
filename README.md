@@ -40,10 +40,18 @@ angular.module('myApp').controller('myCtrl', function(myWsClient, $log){
   
 ### API
 
-| Method        | Def           | 
+| Method        | Definition    | 
 | :-----------: |:-------------:| 
 | connect       |               | 
 | send          |               | 
 | close         |               | 
 | subscribe     |               | 
 | unsubscribe   |               | 
+
+### Options
+
+| Option | Default |
+|:------:|:--------|
+| url | null |
+| reconnect | true |
+| reconnectIntervalTimeout | 5000 |
