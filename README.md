@@ -41,7 +41,7 @@ angular.module('myApp').controller('myCtrl', function(myWsClient, $log){
 ### API
 
 | Method        | Definition    | 
-| :-----------: |:-------------:| 
+| :----------- |:-------------:| 
 | connect       |               | 
 | send          |               | 
 | close         |               | 
@@ -51,7 +51,7 @@ angular.module('myApp').controller('myCtrl', function(myWsClient, $log){
 ### Options
 
 | Option | Default |
-|:------:|:--------|
+|:------|:--------|
 | url | null |
 | reconnect | true |
 | reconnectIntervalTimeout | 5000 |
