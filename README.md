@@ -7,13 +7,13 @@ Angular websocket factory
 
 ### Usage
 
-    - add `am-ws` module to your application module dependencies
+- add `am-ws` module to your application module dependencies
 
 ```javascript
 angular.module('myApp', ['am-ws', ...]);
 ```
 
-    - create ws client
+- create ws client
     
 ```javascript
 angular.module('myApp').service('myWsClient', function(wsFactory){
@@ -24,7 +24,8 @@ angular.module('myApp').service('myWsClient', function(wsFactory){
 });
 ```    
 
-    - use client
+- use client
+
 ```javascript
 angular.module('myApp').controller('myCtrl', function(myWsClient, $log){
     myWsClient.socket.subscribe('mySubscription', function(message){
@@ -34,4 +35,14 @@ angular.module('myApp').controller('myCtrl', function(myWsClient, $log){
     myWsClient.socket.unsubscribe('mySubscription');
     myWsClient.socket.close();
 });
-```     
+```   
+  
+### API
+
+| Method        | Def           | 
+| :-----------: |:-------------:| 
+| connect       |               | 
+| send          |               | 
+| close         |               | 
+| subscribe     |               | 
+| unsubscribe   |               | 
