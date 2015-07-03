@@ -6,11 +6,6 @@
 
     function wsClient($timeout, $log) {
 
-        var NO_CONNECTION = 0;
-        var CONNECTED = 1;
-        var CLOSING = 2;
-        var CLOSED_OR_COULDNT_OPEN = 3;
-
         // default options
         var defaults = {
             url: null,
@@ -58,6 +53,30 @@
                 $log.debug('unsubscribing [' + subscriber + '] from socket [' + options.url + ']');
                 delete subscribers[subscriber];
             };
+
+            /**
+             * The readonly attribute readyState represents the state of the connection. It can have the following values:
+             *
+             * - A value of 0 indicates that the connection has not yet been established.
+             * - A value of 1 indicates that the connection is established and communication is possible.
+             * - A value of 2 indicates that the connection is going through the closing handshake.
+             * - A value of 3 indicates that the connection has been closed or could not be opened.
+             *
+             * @returns {boolean}
+             * @private
+             */
+            this.connectionState = function () {
+                if (socket) {
+                    return socket.readyState;
+                } else {
+                    return undefined;
+                }
+            };
+
+            this.CONNECTION_STATE_NO_CONNECTION = 0;
+            this.CONNECTION_STATE_CONNECTED = 1;
+            this.CONNECTION_STATE_CLOSING = 2;
+            this.CONNECTION_STATE_CLOSED_OR_COULDNT_OPEN = 3;
 
             function connect() {
                 socket = new WebSocket(options.url);

@@ -47,6 +47,7 @@ angular.module('myApp').controller('myCtrl', function(myWsClient, $log){
 | close         |               | 
 | subscribe     |               | 
 | unsubscribe   |               | 
+| connectionState   |               | 
 
 ### Options
 
