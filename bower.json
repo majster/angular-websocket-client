@@ -1,7 +1,7 @@
 {
   "name": "am-websocket",
   "main": ["src/wsClient.js"],
-  "version": "0.1",
+  "version": "0.0.1",
   "description": "Web socket client factory.",
   "license": "MIT",
   "ignore": []
