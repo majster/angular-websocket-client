@@ -4,14 +4,23 @@
 
     angular.module('am.ws', []);
 
-    function wsClient($timeout, $log) {
+    /**
+     * wsClient object
+     * @param $log
+     * @param $interval
+     * @returns {Function}
+     */
+    function wsClient($log, $interval) {
 
         // default options
         var defaults = {
             url: null,
             reconnect: true,
             reconnectIntervalTimeout: 5000,
-            callbacks: {}
+            callbacks: {},
+            keepAlive: false,
+            keepAliveMessage: '{ping:true}',
+            keepAliveIntervalTime: 10000
         };
 
         return function (_options) {
@@ -19,11 +28,18 @@
             var options = angular.extend({}, defaults, _options);
             // this gets populated by WebSocket obj
             var socket = null;
-
+            // subscribers object to hold references to callback functions
             var subscribers = {};
-            var reconnectTimeout = null;
+            // reference to $interval for reconnection
+            var reconnectInterval = null;
+            // interval for checking connection
+            var keepAliveInterval = null;
 
+            var that = this;
 
+            /**
+             * Function tries to establish connection to socket url
+             */
             this.connect = function () {
                 if (!options.url) {
                     $log.error('wsClient connection URL not defined!');
@@ -33,22 +49,47 @@
                 connect();
             };
 
+            /**
+             * Function for sending message to socket
+             * @param message
+             */
             this.send = function (message) {
-                socket.send(message);
+                // TODO: stack messages if not connected
+                if (socket.readyState === that.CONNECTION_STATE_CONNECTED) {
+                    socket.send(message);
+                } else {
+                    $log.error('wsClient not connected. Message not sent.');
+                }
             };
 
-            // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
+            /**
+             * Function for closing connection
+             *
+             * https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
+             * @param code
+             * @param reason
+             */
             this.close = function (code, reason) {
                 // we don't want to reconnect when manual close
                 options.reconnect = false;
                 socket.close(code, reason);
             };
 
+            /**
+             * Function for tracking subscribers to socket messages.
+             * User responsible for unsubscribing (reference cleanup)
+             * @param subscriber
+             * @param callback
+             */
             this.subscribe = function (subscriber, callback) {
                 $log.debug('new subscriber [' + subscriber + '] to socket [' + options.url + ']');
                 subscribers[subscriber] = callback;
             };
 
+            /**
+             * Function for unsubscribing from socket messages
+             * @param subscriber
+             */
             this.unsubscribe = function (subscriber) {
                 $log.debug('unsubscribing [' + subscriber + '] from socket [' + options.url + ']');
                 delete subscribers[subscriber];
@@ -78,6 +119,9 @@
             this.CONNECTION_STATE_CLOSING = 2;
             this.CONNECTION_STATE_CLOSED_OR_COULDNT_OPEN = 3;
 
+            /**
+             * Setup new WebSocket object
+             */
             function connect() {
                 socket = new WebSocket(options.url);
                 socket.onopen = onOpen;
@@ -89,20 +133,35 @@
             function onOpen(event) {
                 $log.debug('wsClient connected to [' + options.url + ']');
                 $log.debug(event);
-                if (reconnectTimeout) {
-                    $timeout.cancel(reconnectTimeout);
+
+                // no need for reconnecting
+                if (reconnectInterval) {
+                    $interval.cancel(reconnectInterval);
+                }
+
+                // start service to check connection (fake ping pong)
+                // http://www.w3.org/TR/2011/CR-websockets-20111208/#ping-and-pong-frames
+                if (options.keepAlive) {
+                    $log.debug('wcClient keep alive is up. will send ping \'options.keepAliveMessage\': [' + options.keepAliveMessage + '] every \'options.keepAliveIntervalTime\': [' + options.keepAliveIntervalTime + '] ms');
+                    keepAliveInterval = $interval(function () {
+                        that.send(options.keepAliveMessage);
+                    }, options.keepAliveIntervalTime);
                 }
             }
 
             function onClose(event) {
                 $log.debug('wsClient connection to [' + options.url + '] closed');
                 $log.debug(event);
-                if (reconnectTimeout) {
-                    $timeout.cancel(reconnectTimeout);
+
+                // no need for this if disconnected
+                if (keepAliveInterval) {
+                    $interval.cancel(keepAliveInterval);
                 }
+
+                // try to reestablish connection
                 if (options.reconnect) {
                     $log.debug('wsClient will try to reconnect in [' + options.reconnectIntervalTimeout + '] ms');
-                    reconnectTimeout = $timeout(connect, options.reconnectIntervalTimeout);
+                    reconnectInterval = $interval(connect, options.reconnectIntervalTimeout);
                 }
             }
 
