@@ -137,11 +137,12 @@
                 // no need for reconnecting
                 if (reconnectInterval) {
                     $interval.cancel(reconnectInterval);
+                    reconnectInterval = null;
                 }
 
                 // start service to check connection (fake ping pong)
                 // http://www.w3.org/TR/2011/CR-websockets-20111208/#ping-and-pong-frames
-                if (options.keepAlive) {
+                if (options.keepAlive && !keepAliveInterval) {
                     $log.debug('wcClient keep alive is up. will send ping \'options.keepAliveMessage\': [' + options.keepAliveMessage + '] every \'options.keepAliveIntervalTime\': [' + options.keepAliveIntervalTime + '] ms');
                     keepAliveInterval = $interval(function () {
                         that.send(options.keepAliveMessage);
@@ -156,10 +157,11 @@
                 // no need for this if disconnected
                 if (keepAliveInterval) {
                     $interval.cancel(keepAliveInterval);
+                    keepAliveInterval = null;
                 }
 
                 // try to reestablish connection
-                if (options.reconnect) {
+                if (options.reconnect && !reconnectInterval) {
                     $log.debug('wsClient will try to reconnect in [' + options.reconnectIntervalTimeout + '] ms');
                     reconnectInterval = $interval(connect, options.reconnectIntervalTimeout);
                 }
