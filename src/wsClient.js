@@ -55,7 +55,7 @@
              */
             this.send = function (message) {
                 // TODO: stack messages if not connected
-                if (socket.readyState === that.CONNECTION_STATE_CONNECTED) {
+                if (socket && socket.readyState === that.CONNECTION_STATE_CONNECTED) {
                     socket.send(message);
                 } else {
                     $log.error('wsClient not connected. Message not sent.');
