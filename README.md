@@ -53,13 +53,19 @@ angular.module('myApp', ['am-ws', ...]);
 
 ```javascript
 angular.module('myApp').controller('myCtrl', function($scope, WebsocketsClient, $log){
-            // lets subscribe to websockets messages
-            WebsocketsClient.subscribe('MyKeyForThisSubcription', _printerCallback);
+
+            // define callback function
+            var _callback = function(message){
+                console.debug(message);
+            };
+
+            // lets subscribe to websockets messages and pass reference of our callback to socket client.
+            WebsocketsClient.subscribe('MyKeyForThisSubcription', _callback);
             WebsocketsClient.init();
 
             // clean references
             $scope.$on('$destroy', function(){
-                WebsocketsClient.unsubscribe('clientBoot');
+                WebsocketsClient.unsubscribe('MyKeyForThisSubcription');
             });
 });
 ```
