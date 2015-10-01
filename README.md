@@ -86,13 +86,13 @@ angular.module('myApp').controller('myCtrl', function($scope, WebsocketsClient, 
 
 | Option | Default |
 |:------|:--------|
-            |url| null|
-            |reconnect| true|
-            |reconnectIntervalTimeout| 5000|
-            |callbacks| {}|
-            |keepAlive| false|
-            |keepAliveMessage| '{ping:true}'|
-            |keepAliveIntervalTime| 10000|
+| url | null|
+| reconnect | true|
+| reconnectIntervalTimeout | 5000|
+| callbacks | {}|
+| keepAlive | false|
+| keepAliveMessage | '{ping:true}'|
+| keepAliveIntervalTime | 10000|
 
 ### Callbacks
 Callback functions are called by reference, so cleanup mandatory to avoid memory leak.
