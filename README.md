@@ -47,7 +47,6 @@ angular.module('myApp', ['am-ws', ...]);
     };
 
     angular.module('myApp').factory('WebsocketsClient', WebsocketsClient);
-
 ```    
 
 - use client
@@ -69,7 +68,8 @@ angular.module('myApp').controller('myCtrl', function($scope, WebsocketsClient, 
         // socket clean up
         $window.onbeforeunload = function () {
             WebsocketsClient.close();
-        };```
+        };
+```
   
 ### API
 
