@@ -95,7 +95,7 @@ angular.module('myApp').controller('myCtrl', function($scope, WebsocketsClient, 
 | url | null|
 | reconnect | true|
 | reconnectIntervalTimeout | 5000|
-| callbacks | {}|
+| callbacks | { onOpen: null, onClose: null, onError: null}|
 | keepAlive | false|
 | keepAliveMessage | '{ping:true}'|
 | keepAliveIntervalTime | 10000|
