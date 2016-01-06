@@ -1,5 +1,5 @@
 {
-  "name": "am-websocket",
+  "name": "angular-ws-factory",
   "main": ["src/wsClient.js"],
   "version": "0.0.1",
   "description": "Web socket client factory.",
