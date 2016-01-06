@@ -133,6 +133,9 @@
             function onOpen(event) {
                 $log.debug('wsClient connected to [' + options.url + ']');
                 $log.debug(event);
+                if (options.callbacks.onOpen) {
+                    options.callbacks.onOpen();
+                }
 
                 // no need for reconnecting
                 if (reconnectInterval) {
@@ -153,6 +156,9 @@
             function onClose(event) {
                 $log.debug('wsClient connection to [' + options.url + '] closed');
                 $log.debug(event);
+                if (options.callbacks.onClose) {
+                    options.callbacks.onClose();
+                }
 
                 // no need for this if disconnected
                 if (keepAliveInterval) {
@@ -181,6 +187,9 @@
             function onError(event) {
                 $log.debug('wsClient connection to [' + options.url + '] error');
                 $log.error(event);
+                if (options.callbacks.onError) {
+                    options.callbacks.onError();
+                }
             }
         };
     }
