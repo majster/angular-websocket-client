@@ -170,6 +170,9 @@
                 if (options.reconnect && !reconnectInterval) {
                     $log.debug('wsClient will try to reconnect in [' + options.reconnectIntervalTimeout + '] ms');
                     reconnectInterval = $interval(connect, options.reconnectIntervalTimeout);
+                } else {
+                    // clear interval if reconnect disabled or connection never happened and was closed.
+                    $interval.cancel(reconnectInterval);
                 }
             }
 
