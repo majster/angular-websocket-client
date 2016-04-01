@@ -1,48 +1,27 @@
-Angular websocket factory
+Angular websocket wrapper
 =========================
-
-Websocket client factory is intended to have subscribers to socket, and multiple clients.
 
 ## Getting started
 
 ### Usage
 
-- add `am-ws` module to your application module dependencies
+- add `websocket.wrapper` module to your application module dependencies
 
 ```javascript
-angular.module('myApp', ['am-ws', ...]);
+angular.module('myApp', ['websocket.wrapper', ...]);
 ```
 
 - create ws client
     
 ```javascript
-    var WebsocketsClient = function (wsClient) {
+    var WebsocketsClient = function (websocketWrapper) {
 
         var options = {
             url: 'wss://localhost:58443/Game?id=gui'
         };
-        var client = new wsClient(options);
+        WebsocketsClient.client = new websocketWrapper(options);
 
-        return {
-            init: function () {
-                client.connect();
-            },
-            send: function (message) {
-                client.send(message);
-            },
-            disconnect: function () {
-                client.close(1000);
-            },
-            subscribe: function (subscriber, callback) {
-                client.subscribe(subscriber, callback);
-            },
-            unsubscribe: function () {
-                client.unsubscribe();
-            },
-            connection: function(){
-                return client.connectionState();
-            }
-        };
+        return WebsocketsClient;
 
     };
 
@@ -52,53 +31,40 @@ angular.module('myApp', ['am-ws', ...]);
 - use client
 
 ```javascript
-angular.module('myApp').controller('myCtrl', function($scope, WebsocketsClient, $log){
-
-            // define callback function
-            var _callback = function(message){
-                console.debug(message);
-            };
-
-            // lets subscribe to websockets messages and pass reference of our callback to socket client.
-            WebsocketsClient.subscribe('MyKeyForThisSubcription', _callback);
+angular.module('myApp').controller('myCtrl', function($scope, WebsocketsClient, $log, $rootScope){
+         
             WebsocketsClient.init();
+            $rootScope.$on(WebsocketsClient.socket.onMessageBroadcastEvent, function(event, message){
+                //
+            });
 
             // clean references
             $scope.$on('$destroy', function(){
-                WebsocketsClient.unsubscribe('MyKeyForThisSubcription');
+                WebsocketsClient.socket.close();
             });
 });
-```
-```javascript
-        // You can add snipet to run method for socket responsible cleanup
-        // socket clean up
-        $window.onbeforeunload = function () {
-            WebsocketsClient.close();
-        };
 ```
   
 ### API
 
 | Method        | Definition    | 
 | :----------- |:-------------:| 
-| connect       |               | 
 | send          |               | 
 | close         |               | 
-| subscribe     |               | 
-| unsubscribe   |               | 
-| connectionState   |               | 
 
 ### Options
 
 | Option | Default |
 |:------|:--------|
-| url | null|
-| reconnect | true|
-| reconnectIntervalTimeout | 5000|
-| callbacks | { onOpen: null, onClose: null, onError: null}|
-| keepAlive | false|
-| keepAliveMessage | '{ping:true}'|
-| keepAliveIntervalTime | 10000|
-
-### Callbacks
-Callback functions are called by reference, so cleanup mandatory to avoid memory leak.
+|url| null|
+|id| 'websocket'|
+|onOpenBroadcast| true|
+|onErrorBroadcast| true|
+|onCloseBroadcast| true|
+|onFailedSendBroadcast| true|
+|reconnect| true|
+|reconnectIntervalTimeout| 5000|
+|keepAlive| false|
+|keepAliveMessage| '{ping:true}'|
+|keepAliveIntervalTime| 10000|
+|onMessageBroadcastOnlyData| true|
