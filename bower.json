@@ -1,8 +1,8 @@
 {
   "name": "angular-ws-factory",
   "main": ["src/websocket-wrapper.js"],
-  "version": "0.1.0",
-  "description": "Web socket wrapper.",
+  "version": "0.1.1",
+  "description": "Websocket wrapper.",
   "license": "MIT",
   "ignore": []
 }
