@@ -28,13 +28,13 @@
             var reconnectInterval = null;
             var keepAliveInterval = null;
 
-            this.onMessageBroadcastEvent = options.id + '_message';
-            this.onOpenBroadcastEvent = options.id + '_opened';
-            this.onErrorBroadcastEvent = options.id + '_error';
-            this.onCloseBroadcastEvent = options.id + '_closed';
-            this.onSendFailedBroadcastEvent = options.id + '_send_failed';
+            that.onMessageBroadcastEvent = options.id + '_message';
+            that.onOpenBroadcastEvent = options.id + '_opened';
+            that.onErrorBroadcastEvent = options.id + '_error';
+            that.onCloseBroadcastEvent = options.id + '_closed';
+            that.onSendFailedBroadcastEvent = options.id + '_send_failed';
 
-            this.socket = null;
+            that.socket = null;
 
             /*
              * - A value of 0 indicates that the connection has not yet been established.
@@ -43,35 +43,35 @@
              * - A value of 3 indicates that the connection has been closed or could not be opened.
              *
              */
-            this.states = {
+            that.states = {
                 CONNECTION_STATE_NO_CONNECTION: 0,
                 CONNECTION_STATE_CONNECTED: 1,
                 CONNECTION_STATE_CLOSING: 2,
                 CONNECTION_STATE_CLOSED_OR_COULDNT_OPEN: 3
             };
 
-            this.connect = function () {
-                this.socket = new WebSocket(options.url);
-                this.socket.onopen = onOpen;
-                this.socket.onclose = onClose;
-                this.socket.onmessage = onMessage;
-                this.socket.onerror = onError;
+            that.connect = function () {
+                that.socket = new WebSocket(options.url);
+                that.socket.onopen = onOpen;
+                that.socket.onclose = onClose;
+                that.socket.onmessage = onMessage;
+                that.socket.onerror = onError;
             };
 
-            this.connect();
+            that.connect();
 
-            this.close = function (code, reason) {
+            that.close = function (code, reason) {
                 if (!code) {
                     code = 1000;
                 }
                 // we don't want to reconnect when manual close
                 options.reconnect = false;
-                this.socket.close(code, reason);
+                that.socket.close(code, reason);
             };
 
-            this.send = function (message) {
-                if (this.socket && this.socket.readyState === this.states.CONNECTION_STATE_CONNECTED) {
-                    this.socket.send(message);
+            that.send = function (message) {
+                if (that.socket && that.socket.readyState === that.states.CONNECTION_STATE_CONNECTED) {
+                    that.socket.send(message);
                 } else {
                     $log.error('Socket to [%s] not connected. Message not sent.', options.url);
                     if (options.onFailedSendBroadcast) {
@@ -94,7 +94,7 @@
                 // start service to check connection (fake ping pong)
                 // http://www.w3.org/TR/2011/CR-websockets-20111208/#ping-and-pong-frames
                 if (options.keepAlive && !keepAliveInterval) {
-                    $log.debug('Websocket wrapper keepAlive is up. Will send ping [%s] every [%s] ms.', options.keepAliveMessage, options.keepAliveIntervalTime);
+                    $log.debug('Socket keepAlive is up for [%s]. Will send ping [%s] every [%s] ms.',options.url, options.keepAliveMessage, options.keepAliveIntervalTime);
                     keepAliveInterval = $interval(function () {
                         that.send(options.keepAliveMessage);
                     }, options.keepAliveIntervalTime);
@@ -115,9 +115,11 @@
                 }
 
                 // try to reestablish connection
-                if (options.reconnect && !reconnectInterval) {
-                    $log.debug('Websocket wrapper will try to reconnect in [%s] ms.', options.reconnectIntervalTimeout);
-                    reconnectInterval = $interval(that.connect, options.reconnectIntervalTimeout);
+                if (options.reconnect) {
+                    if (reconnectInterval) {
+                        $log.debug('Socket to [%s] will try to reconnect in [%s] ms.', options.url, options.reconnectIntervalTimeout);
+                        reconnectInterval = $interval(that.connect, options.reconnectIntervalTimeout);
+                    }
                 } else {
                     // clear interval if reconnect disabled or connection never happened and was closed.
                     $interval.cancel(reconnectInterval);
