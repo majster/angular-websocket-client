@@ -116,7 +116,7 @@
 
                 // try to reestablish connection
                 if (options.reconnect) {
-                    if (reconnectInterval) {
+                    if (!reconnectInterval) {
                         $log.debug('Socket to [%s] will try to reconnect in [%s] ms.', options.url, options.reconnectIntervalTimeout);
                         reconnectInterval = $interval(that.connect, options.reconnectIntervalTimeout);
                     }
