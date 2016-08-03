@@ -14,57 +14,93 @@ angular.module('myApp', ['websocket.wrapper', ...]);
 - create ws client
     
 ```javascript
-    var WebsocketsClient = function (websocketWrapper) {
-
-        var options = {
-            url: 'wss://localhost:58443/Game?id=gui'
+    
+    function myWSClient(websocketWrapper){
+        myWSClient.start = function(){
+            var options = {
+                url: 'wss://...',
+                id: 'mySocket1'
+            };
+            
+            myWSClient.socket = new websocketWrapper(options);
         };
-        WebsocketsClient.client = new websocketWrapper(options);
-
-        return WebsocketsClient;
-
-    };
-
-    angular.module('myApp').factory('WebsocketsClient', WebsocketsClient);
+        
+        return myWSClient;
+    }
+    
+    angular.module('myApp').factory('myWSClient', myWSClient);
+    
 ```    
 
 - use client
 
 ```javascript
-angular.module('myApp').controller('myCtrl', function($scope, WebsocketsClient, $log, $rootScope){
-         
-            WebsocketsClient.init();
-            $rootScope.$on(WebsocketsClient.socket.onMessageBroadcastEvent, function(event, message){
-                //
-            });
 
-            // clean references
-            $scope.$on('$destroy', function(){
-                WebsocketsClient.socket.close();
-            });
-});
+    angular.module('myApp').controller('myCtrl', function($scope, myWSClient){
+         
+        myWSClient.start();
+        
+        $scope.$on(myWSClient.socket.onOpenBroadcastEvent, function(event, message){
+            
+            message = JSON.parse(message);
+            
+            console.log(message);
+        });
+        
+        $scope.$on(myWSClient.socket.onErrorBroadcastEvent, function(event, message){
+            
+            message = JSON.parse(message);
+            
+            console.log(message);
+        }); 
+        
+        $scope.$on(myWSClient.socket.onCloseBroadcastEvent, function(event, message){
+            
+            message = JSON.parse(message);
+            
+            console.log(message);
+        });
+        
+        $scope.$on(myWSClient.socket.onMessageBroadcastEvent, function(event, message){
+            
+            message = JSON.parse(message);
+            
+            console.log(message);
+        });
+        
+        
+    });
+
 ```
+
+### Broadcasted events
+Are constricted from socket options ID.
+- onMessageBroadcastEvent = options.id + '_message';
+- onOpenBroadcastEvent = options.id + '_opened';
+- onErrorBroadcastEvent = options.id + '_error';
+- onCloseBroadcastEvent = options.id + '_closed';
+- onSendFailedBroadcastEvent = options.id + '_send_failed';
   
 ### API
 
 | Method        | Definition    | 
 | :----------- |:-------------:| 
-| send          |               | 
-| close         |               | 
+| send          | Send message down the socket.            | 
+| close         | Close socket connection manualy              | 
 
 ### Options
 
-| Option | Default |
-|:------|:--------|
-|url| null|
-|id| 'websocket'|
-|onOpenBroadcast| true|
-|onErrorBroadcast| true|
-|onCloseBroadcast| true|
-|onFailedSendBroadcast| true|
-|reconnect| true|
-|reconnectIntervalTimeout| 5000|
-|keepAlive| false|
-|keepAliveMessage| '{ping:true}'|
-|keepAliveIntervalTime| 10000|
-|onMessageBroadcastOnlyData| true|
+| Option | Description | Default |
+|:------|:-------|:--------|
+|url| Url to connect to| null|
+|id| Id for multiple sockets|'websocket'|
+|onOpenBroadcast| Broadcasted event on soket open| true|
+|onErrorBroadcast| Broadcasted event on socket error| true|
+|onCloseBroadcast| Broadcasted event on socket close|true|
+|onFailedSendBroadcast| Broadcasted event on socket faild send message| true|
+|reconnect| Reconnect socket if connection not closed manualy| true|
+|reconnectIntervalTimeout| Try reconnection every [n] ms| 5000|
+|keepAlive| Send keepalive pings | false|
+|keepAliveMessage| Keepalive ping message| '{ping:true}'|
+|keepAliveIntervalTime| Send keepalive every [n] ms|10000|
+|onMessageBroadcastOnlyData| Unwrap message from data.| true|
