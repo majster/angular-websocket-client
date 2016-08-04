@@ -1,6 +1,12 @@
 Angular websocket wrapper
 =========================
 
+## Why this socket wrapper
+- automatic reconnect on fleaky connection (option)
+- ping support (option)
+- multiple sockets (assign id to each)
+- pure angular (including logs)
+
 ## Getting started
 
 ### Usage
@@ -104,3 +110,6 @@ Are constricted from socket options ID.
 |keepAliveMessage| Keepalive ping message| '{ping:true}'|
 |keepAliveIntervalTime| Send keepalive every [n] ms|10000|
 |onMessageBroadcastOnlyData| Unwrap message from data.| true|
+
+## TODO
+- tests
